@@ -34,6 +34,22 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isProduction = process.env.NODE_ENV === 'production';
 
+  // Sem as variáveis do Supabase o painel não tem como autenticar ninguém.
+  // Melhor uma página dizendo o que falta do que um 500 sem explicação.
+  const configured =
+    Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
+    Boolean(process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
+
+  if (!configured) {
+    if (pathname === '/configuracao-pendente') {
+      return applySecurityHeaders(NextResponse.next({ request }), request, isProduction);
+    }
+    const url = request.nextUrl.clone();
+    url.pathname = '/configuracao-pendente';
+    url.search = '';
+    return applySecurityHeaders(NextResponse.redirect(url), request, isProduction);
+  }
+
   const { response, user } = await updateSession(request);
 
   // ---------------------------------------------------------------- redireções

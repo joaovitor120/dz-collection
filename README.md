@@ -1,59 +1,87 @@
-# DZ Collection — catálogo digital
+# DZ Collection
 
-Site institucional e catálogo da **DZ Collection**, construído em Next.js.
-Não é um e-commerce: a jornada é **ver → escolher → conhecer o produto → comprar pelo WhatsApp**.
-Não existe carrinho, checkout, pagamento online nem cadastro.
+Monorepo com duas aplicações:
 
-## Stack
+| Pasta | O que é | Porta local |
+|---|---|---|
+| `apps/site` | Catálogo público | 3000 |
+| `apps/admin` | Painel administrativo | 3001 |
+| `packages/shared` | Tipos, schemas Zod, dinheiro, WhatsApp, clientes Supabase | — |
+| `supabase/` | Migrations, seed e testes de RLS | — |
 
-- Next.js 14 (App Router) + React 18 + TypeScript
-- Tailwind CSS 3 (design system em `tailwind.config.ts` + `src/app/globals.css`)
-- `next/image` para otimização de imagens, `next/font` para as fontes
+Não é e-commerce: a jornada é ver → escolher → conhecer o produto → **comprar pelo
+WhatsApp**. Não existe carrinho, checkout, pagamento nem cadastro de cliente.
 
-## Rodando localmente
+---
+
+## Rodando na sua máquina
+
+Requer **Node 20.11+**.
 
 ```bash
 npm install
-cp .env.example .env.local
-npm run dev
 ```
 
-## Variável de ambiente obrigatória
-
-```env
-NEXT_PUBLIC_SITE_URL=https://dz-collection.vercel.app
-```
-
-Essa URL é usada para montar o link do produto enviado na mensagem do WhatsApp,
-além de canonical, sitemap e Open Graph. **Nunca pode apontar para localhost em
-produção**, porque a proprietária clica nesse link depois, dentro da conversa.
-
-Na Vercel: Project → Settings → Environment Variables → `NEXT_PUBLIC_SITE_URL`.
-
-## WhatsApp
-
-Toda a lógica está centralizada em dois arquivos:
-
-- `src/data/site.ts` → `WHATSAPP_NUMBER = '5527996441300'`
-- `src/lib/whatsapp.ts` → `createProductWhatsAppUrl(product)` e `createGeneralWhatsAppUrl()`
-
-A mensagem de produto sempre carrega o **nome exato** e a **URL pública** daquele
-produto, para identificar de imediato qual peça gerou o contato.
-
-## Dados dos produtos
-
-`src/data/products.ts` — extraído da loja atual em
-`dzcollection.lojavirtualnuvem.com.br` (auditoria de 07/09/2026).
-Para publicar um novo produto: adicione o objeto, coloque as imagens em
-`public/images/products/<modelo>/` e marque `isNew: true` nas peças que devem
-aparecer em "Lançamentos".
-
-## Scripts
+### Catálogo público — funciona sem nenhuma configuração
 
 ```bash
-npm run dev        # desenvolvimento
-npm run build      # build de produção
-npm run start      # servir o build
-npm run typecheck  # TypeScript
-node qa.mjs        # suíte de QA end-to-end (precisa do servidor em :3100)
+npm run dev:site
 ```
+
+Abra <http://localhost:3000>.
+
+> Nesta etapa o catálogo ainda lê `apps/site/src/data/products.ts`. A troca para
+> o banco é o próximo passo do projeto; os dados já estão migrados e conferidos.
+
+### Painel administrativo — precisa do Supabase
+
+```bash
+npm run dev:admin
+```
+
+Abra <http://localhost:3001>. Sem as variáveis de ambiente o painel mostra uma
+página listando o que falta, em vez de quebrar.
+
+Para ligar de verdade, crie `apps/admin/.env.local`:
+
+```env
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+NEXT_PUBLIC_ADMIN_URL=http://localhost:3001
+NEXT_PUBLIC_SUPABASE_URL=https://SEU-PROJETO.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+SUPABASE_SECRET_KEY=sb_secret_...
+```
+
+O passo a passo para criar o projeto e pegar essas chaves está em
+[`docs/SETUP-SUPABASE.md`](docs/SETUP-SUPABASE.md).
+
+> `.env.local` está no `.gitignore`. Nunca versione valores reais.
+
+---
+
+## Verificação
+
+```bash
+npm run typecheck   # TypeScript strict nos dois apps
+npm run build       # build de produção dos dois
+npm run test:db     # migrations + matriz de RLS + seed + conferência de dados
+```
+
+`test:db` precisa de um PostgreSQL local em `localhost:5433`. Ele recria o banco
+do zero, aplica as migrations reais, roda 46 casos de segurança (anon,
+autenticado não-admin e admin — testando o permitido **e** o negado) e compara o
+catálogo antigo com o banco campo a campo.
+
+---
+
+## Estado atual
+
+Veja [`docs/STATUS.md`](docs/STATUS.md) para o que já está verificado com
+evidência, o que está escrito mas ainda não foi testado ponta a ponta, e o que
+falta construir.
+
+## Segurança
+
+Toda a arquitetura de autenticação, autorização, RLS, Storage, rate limiting e
+rotação de chaves está documentada em `docs/`. Nenhum valor secreto aparece no
+repositório.

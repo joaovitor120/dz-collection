@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { createClient } from '@dz/shared/supabase/server';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
 import { ForbiddenError, UnauthorizedError, logServer } from './security';
@@ -106,6 +107,26 @@ function readAuthTime(user: User): number {
   }
   const iso = user.last_sign_in_at ?? user.created_at;
   return iso ? Math.floor(new Date(iso).getTime() / 1000) : 0;
+}
+
+/**
+ * Versão para PÁGINAS: em vez de estourar um erro, encaminha a pessoa para o
+ * lugar certo — login, verificação de MFA ou aviso de falta de permissão.
+ *
+ * As Server Actions continuam usando `requireAdmin()`, que lança: ali um
+ * redirect silencioso esconderia uma falha de autorização real.
+ */
+export async function requireAdminPage(
+  options: { requireMfa?: boolean } = {},
+): Promise<AdminSession> {
+  try {
+    return await requireAdmin(options);
+  } catch (error) {
+    if (error instanceof MfaRequiredError) redirect('/login/verificacao');
+    if (error instanceof ForbiddenError) redirect('/sem-permissao');
+    if (error instanceof UnauthorizedError) redirect('/login');
+    throw error;
+  }
 }
 
 export class MfaRequiredError extends Error {

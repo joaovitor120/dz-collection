@@ -1,4 +1,4 @@
-import { requireAdmin } from '@/lib/auth';
+import { requireAdminPage } from '@/lib/auth';
 import { MfaSetup } from '@/components/MfaSetup';
 import { PasswordChangeForm } from '@/components/PasswordChangeForm';
 
@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export default async function Page() {
   // requireMfa: false — esta é justamente a tela onde o MFA é configurado pela
   // primeira vez. Todas as demais rotas do painel exigem aal2.
-  const { client, user } = await requireAdmin({ requireMfa: false });
+  const { client, user } = await requireAdminPage({ requireMfa: false });
   const { data: factors } = await client.auth.mfa.listFactors();
   const verified = factors?.totp?.find((f) => f.status === 'verified') ?? null;
 

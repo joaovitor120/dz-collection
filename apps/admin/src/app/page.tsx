@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { requireAdmin } from '@/lib/auth';
+import { requireAdminPage } from '@/lib/auth';
 import { signOut } from '@/app/login/actions';
 
 export const metadata = { title: 'Painel' };
@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 /** Dashboard. Todos os números vêm do banco — nada hardcoded. */
 export default async function DashboardPage() {
-  const { client, user } = await requireAdmin();
+  const { client, user } = await requireAdminPage();
 
   const [produtos, ativos, lancamentos, destaques, categorias] = await Promise.all([
     client.from('products').select('id', { count: 'exact', head: true }),

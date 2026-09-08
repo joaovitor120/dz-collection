@@ -109,7 +109,7 @@ export function ProductGallery({ product }: { product: Product }) {
             <FallbackImage />
           ) : (
             <Image
-              src={product.images[index]}
+              src={product.images[index] ?? ''}
               alt={alt(index)}
               fill
               priority
@@ -148,7 +148,7 @@ export function ProductGallery({ product }: { product: Product }) {
             aria-label="Fechar ampliação"
           >
             <Image
-              src={product.images[index]}
+              src={product.images[index] ?? ''}
               alt={alt(index)}
               fill
               sizes="100vw"

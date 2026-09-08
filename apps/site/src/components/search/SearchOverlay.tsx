@@ -60,6 +60,7 @@ export function SearchOverlay({
         if (focusable.length === 0) return;
         const first = focusable[0];
         const last = focusable[focusable.length - 1];
+        if (!first || !last) return;
         if (event.shiftKey && document.activeElement === first) {
           event.preventDefault();
           last.focus();
@@ -214,7 +215,7 @@ export function SearchOverlay({
                     >
                       <span className="relative h-16 w-12 shrink-0 overflow-hidden bg-paper-shade">
                         <Image
-                          src={p.images[0]}
+                          src={p.images[0] ?? ''}
                           alt=""
                           fill
                           sizes="48px"

@@ -17,6 +17,7 @@ export function StickyBuyBar({ product }: { product: Product }) {
     if (!anchor) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
+        if (!entry) return;
         setVisible(entry.boundingClientRect.top < 0 && !entry.isIntersecting);
       },
       { threshold: 0, rootMargin: '-80px 0px 0px 0px' },

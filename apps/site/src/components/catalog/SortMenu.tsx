@@ -14,7 +14,7 @@ export function SortMenu({
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const current = sortOptions.find((o) => o.key === value) ?? sortOptions[0];
+  const current = sortOptions.find((o) => o.key === value) ?? sortOptions[0]!;
 
   useEffect(() => {
     function onDoc(e: MouseEvent) {

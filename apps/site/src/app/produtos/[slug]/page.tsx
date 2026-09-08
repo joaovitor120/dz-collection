@@ -31,6 +31,7 @@ export function generateMetadata({
   if (!product) return { title: 'Produto não encontrado' };
 
   const description = product.description[0]?.slice(0, 300) ?? site.shortDescription;
+  const primaryImage = product.images[0] ?? '';
 
   return {
     title: product.name,
@@ -41,13 +42,13 @@ export function generateMetadata({
       title: `${product.name} — ${site.name}`,
       description,
       url: productPath(product.slug),
-      images: [{ url: product.images[0], alt: product.imageAlts[0] ?? product.name }],
+      images: [{ url: primaryImage, alt: product.imageAlts[0] ?? product.name }],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${product.name} — ${site.name}`,
       description,
-      images: [product.images[0]],
+      images: [primaryImage],
     },
   };
 }

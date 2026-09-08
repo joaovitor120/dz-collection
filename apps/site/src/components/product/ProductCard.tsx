@@ -21,6 +21,7 @@ export function ProductCard({
   sizes?: string;
 }) {
   const href = productPath(product.slug);
+  const mainImage = product.images[0] ?? '';
   const hoverImage = product.images[1];
 
   return (
@@ -33,7 +34,7 @@ export function ProductCard({
       >
         <div className="relative aspect-[3/4] w-full">
           <Image
-            src={product.images[0]}
+            src={mainImage}
             alt=""
             fill
             sizes={sizes}

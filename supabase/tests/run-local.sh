@@ -32,5 +32,16 @@ done
 echo "→ executando a matriz de segurança"
 psql_ -d "$DB" -f "$ROOT/supabase/tests/01_rls_matrix.sql"
 
+echo "→ limpando fixtures e aplicando o seed do catálogo real"
+psql_ -d "$DB" -q -c "delete from public.product_images; delete from public.product_specifications; delete from public.product_highlights; delete from public.products; delete from public.categories; delete from public.site_settings;"
+psql_ -d "$DB" -q -f "$ROOT/supabase/seed/0001_catalog.sql"
+
+echo "→ reaplicando o seed (checagem de idempotência)"
+psql_ -d "$DB" -q -f "$ROOT/supabase/seed/0001_catalog.sql"
+
+echo "→ conferindo catálogo antigo contra o banco"
+cd "$ROOT" && DB="$DB" PGHOST="$PGHOST" PGPORT="$PGPORT" PGUSER="$PGUSER" \
+  node --experimental-strip-types --no-warnings scripts/verify-migration.mts
+
 echo ""
-echo "✓ TODAS AS VERIFICAÇÕES DE RLS, GRANTS E CONSTRAINTS PASSARAM"
+echo "✓ RLS, GRANTS, CONSTRAINTS, SEED E MIGRAÇÃO DE DADOS VERIFICADOS"

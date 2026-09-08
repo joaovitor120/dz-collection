@@ -83,8 +83,15 @@ $$;
 
 -- -----------------------------------------------------------------------------
 -- AUDIT LOG APPEND-ONLY.
--- Um administrador não pode reescrever a própria trilha pela aplicação.
--- Só o owner do banco (migrations/manutenção) consegue alterar.
+--
+-- Bloqueia UPDATE/DELETE para os papéis que a aplicação usa — inclusive o
+-- backend privilegiado (service_role), que ignora RLS mas não ignora trigger.
+-- Um administrador não consegue reescrever a própria trilha por caminho nenhum
+-- da aplicação.
+--
+-- Manutenção legítima do banco (migrations, expurgo de logs antigos, restore de
+-- backup) roda como owner/postgres e continua possível — do contrário a tabela
+-- se tornaria impossível de administrar.
 -- -----------------------------------------------------------------------------
 create or replace function public.audit_logs_block_mutation()
 returns trigger
@@ -92,8 +99,11 @@ language plpgsql
 set search_path = pg_catalog, public
 as $$
 begin
-  raise exception 'audit_logs é append-only (operação % bloqueada)', tg_op
-    using errcode = 'insufficient_privilege';
+  if current_user in ('anon', 'authenticated', 'service_role', 'authenticator') then
+    raise exception 'audit_logs é append-only (operação % bloqueada)', tg_op
+      using errcode = 'insufficient_privilege';
+  end if;
+  return case tg_op when 'DELETE' then old else new end;
 end;
 $$;
 

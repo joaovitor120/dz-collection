@@ -9,8 +9,8 @@
  * Variáveis: PGHOST, PGPORT, PGUSER, DB (default dz_rls_test)
  */
 import { execFileSync } from 'node:child_process';
-import { products } from '../src/data/products.ts';
-import { categories } from '../src/data/site.ts';
+import { products } from '../apps/site/src/data/products.ts';
+import { categories } from '../apps/site/src/data/site.ts';
 
 const PGHOST = process.env.PGHOST ?? '/tmp';
 const PGPORT = process.env.PGPORT ?? '5433';

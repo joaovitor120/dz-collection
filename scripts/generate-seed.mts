@@ -5,8 +5,8 @@
  * Rodar com:  node --experimental-strip-types scripts/generate-seed.mts
  */
 import { writeFileSync } from 'node:fs';
-import { products } from '../src/data/products.ts';
-import { categories } from '../src/data/site.ts';
+import { products } from '../apps/site/src/data/products.ts';
+import { categories } from '../apps/site/src/data/site.ts';
 
 const q = (v: string | null | undefined) =>
   v === null || v === undefined ? 'null' : `'${v.replace(/'/g, "''")}'`;

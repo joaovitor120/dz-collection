@@ -1,27 +1,24 @@
 {
   "name": "dz-collection",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
+  "workspaces": ["apps/*", "packages/*"],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "next": "14.2.33",
-    "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "dev:site": "npm run dev -w @dz/site",
+    "dev:admin": "npm run dev -w @dz/admin",
+    "build": "npm run build -w @dz/site && npm run build -w @dz/admin",
+    "build:site": "npm run build -w @dz/site",
+    "build:admin": "npm run build -w @dz/admin",
+    "typecheck": "tsc -b apps/site apps/admin packages/shared",
+    "lint": "npm run lint -w @dz/site && npm run lint -w @dz/admin",
+    "test:db": "./supabase/tests/run-local.sh",
+    "test:security": "node --experimental-strip-types --no-warnings scripts/security-suite.mts",
+    "seed:generate": "node --experimental-strip-types --no-warnings scripts/generate-seed.mts",
+    "verify:migration": "node --experimental-strip-types --no-warnings scripts/verify-migration.mts"
   },
   "devDependencies": {
     "@types/node": "20.14.10",
-    "@types/react": "18.3.3",
-    "@types/react-dom": "18.3.0",
-    "autoprefixer": "10.4.19",
-    "playwright": "^1.47.2",
-    "postcss": "8.4.39",
-    "tailwindcss": "3.4.6",
     "typescript": "5.5.3"
-  }
+  },
+  "engines": { "node": ">=20.11" }
 }

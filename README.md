@@ -21,7 +21,7 @@ npm run dev
 ## Variável de ambiente obrigatória
 
 ```env
-NEXT_PUBLIC_SITE_URL=https://seu-dominio.com.br
+NEXT_PUBLIC_SITE_URL=https://dz-collection.vercel.app
 ```
 
 Essa URL é usada para montar o link do produto enviado na mensagem do WhatsApp,

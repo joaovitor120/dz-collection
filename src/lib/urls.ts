@@ -4,7 +4,7 @@
  * continuar válida quando a proprietária clicar nela depois.
  */
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL || 'https://www.dzcollection.com.br'
+  process.env.NEXT_PUBLIC_SITE_URL || 'https://dz-collection.vercel.app'
 ).replace(/\/+$/, '');
 
 export function productPath(slug: string): string {

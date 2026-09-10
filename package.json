@@ -17,7 +17,8 @@
     "test:db": "./supabase/tests/run-local.sh",
     "test:security": "node --experimental-strip-types --no-warnings scripts/security-suite.mts",
     "seed:generate": "node --experimental-strip-types --no-warnings scripts/generate-seed.mts",
-    "verify:migration": "node --experimental-strip-types --no-warnings scripts/verify-migration.mts"
+    "verify:migration": "node --experimental-strip-types --no-warnings scripts/verify-migration.mts",
+    "imagens:subir": "node scripts/subir-imagens.mjs"
   },
   "devDependencies": {
     "@types/node": "20.14.10",

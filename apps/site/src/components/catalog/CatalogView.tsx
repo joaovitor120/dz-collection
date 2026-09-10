@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import type { CatalogFilters, SortKey } from '@/types';
-import { products } from '@/data/products';
+import type { CatalogFilters, Product, SortKey } from '@/types';
 import { categories, priceBuckets } from '@/data/site';
 import {
   activeFilterCount,
@@ -20,9 +19,11 @@ import { CloseIcon, SearchIcon, SlidersIcon } from '@/components/ui/Icon';
 import { toParams } from '@/lib/catalog-params';
 
 export function CatalogView({
+  products,
   initialFilters,
   initialSort,
 }: {
+  products: Product[];
   initialFilters: CatalogFilters;
   initialSort: SortKey;
 }) {
@@ -83,7 +84,7 @@ export function CatalogView({
 
   const result = useMemo(
     () => sortProducts(applyFilters(products, filters), sort),
-    [filters, sort],
+    [products, filters, sort],
   );
 
   const activeCount = activeFilterCount(filters);

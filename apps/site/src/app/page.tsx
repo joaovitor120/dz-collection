@@ -8,7 +8,7 @@ import { Testimonials } from '@/components/home/Testimonials';
 import { ProductGrid } from '@/components/product/ProductGrid';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { buttonClass } from '@/components/ui/Button';
-import { getFeatured, getNewArrivals } from '@/data/products';
+import { fetchFeatured, fetchLaunches, fetchProducts } from '@/lib/db';
 import { site } from '@/data/site';
 
 export const metadata: Metadata = {
@@ -17,9 +17,15 @@ export const metadata: Metadata = {
   alternates: { canonical: '/' },
 };
 
-export default function HomePage() {
-  const newArrivals = getNewArrivals(4);
-  const featured = getFeatured();
+/** Revalida sozinho a cada hora; o painel força a atualização na hora de uma edição. */
+export const revalidate = 3600;
+
+export default async function HomePage() {
+  const [newArrivals, featured, all] = await Promise.all([
+    fetchLaunches(4),
+    fetchFeatured(),
+    fetchProducts(),
+  ]);
 
   return (
     <>
@@ -36,7 +42,7 @@ export default function HomePage() {
         <ProductGrid products={newArrivals} priorityCount={2} />
       </section>
 
-      <CategoryShowcase />
+      <CategoryShowcase products={all} />
 
       {/* DESTAQUES — exatamente os produtos que a loja destaca hoje.
           Não existe dado público de vendas, então não há "mais vendidos". */}

@@ -1,12 +1,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import type { Product } from '@/types';
 import { categories } from '@/data/site';
-import { products } from '@/data/products';
 import { categoryPath } from '@/lib/urls';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 
 /** Apresentação editorial das categorias reais que têm produtos hoje. */
-export function CategoryShowcase() {
+export function CategoryShowcase({ products }: { products: Product[] }) {
   const visible = categories
     .filter((c) => c.image)
     .map((c) => ({

@@ -1,6 +1,6 @@
 import { chromium } from 'playwright';
 
-const BASE = 'http://localhost:3100';
+const BASE = process.env.QA_BASE_URL ?? 'http://localhost:3100';
 const EXEC = '/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell';
 const PHONE = '5527996441300';
 

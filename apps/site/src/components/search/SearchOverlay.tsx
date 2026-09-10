@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { products } from '@/data/products';
+import type { Product } from '@/types';
 import { categories } from '@/data/site';
 import { searchProducts } from '@/lib/catalog';
 import { formatBRL } from '@/lib/format';
@@ -13,9 +13,11 @@ import { CloseIcon, SearchIcon } from '@/components/ui/Icon';
 const SUGGESTIONS = ['Lançamentos', 'Dourado', 'Preto', 'Tartaruga', 'Gatinho'];
 
 export function SearchOverlay({
+  products,
   open,
   onClose,
 }: {
+  products: Product[];
   open: boolean;
   onClose: () => void;
 }) {
@@ -27,15 +29,24 @@ export function SearchOverlay({
   const results = useMemo(() => {
     if (query.trim().length < 1) return [];
     return searchProducts(products, query).slice(0, 6);
-  }, [query]);
+  }, [products, query]);
 
-  useEffect(() => setActive(0), [query]);
+  // Reset de estado derivado acontece DURANTE a renderização, não em efeito:
+  // um efeito que chama setState provoca uma segunda renderização em cascata.
+  const [prevQuery, setPrevQuery] = useState(query);
+  if (prevQuery !== query) {
+    setPrevQuery(query);
+    setActive(0);
+  }
+
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (prevOpen !== open) {
+    setPrevOpen(open);
+    if (!open) setQuery('');
+  }
 
   useEffect(() => {
-    if (!open) {
-      setQuery('');
-      return;
-    }
+    if (!open) return;
     const t = window.setTimeout(() => inputRef.current?.focus(), 40);
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';

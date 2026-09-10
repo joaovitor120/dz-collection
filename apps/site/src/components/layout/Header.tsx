@@ -7,6 +7,7 @@ import { LogoLink } from '@/components/ui/Logo';
 import { MenuIcon, SearchIcon, WhatsAppIcon } from '@/components/ui/Icon';
 import { MobileMenu } from '@/components/layout/MobileMenu';
 import { SearchOverlay } from '@/components/search/SearchOverlay';
+import type { Product } from '@/types';
 import { createGeneralWhatsAppUrl } from '@/lib/whatsapp';
 import { trackGeneralWhatsAppClick } from '@/lib/analytics';
 
@@ -17,7 +18,7 @@ const NAV = [
   { href: '/contato', label: 'Contato', match: '/contato' },
 ];
 
-export function Header() {
+export function Header({ products }: { products: Product[] }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -32,10 +33,14 @@ export function Header() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  useEffect(() => {
+  // Trocou de página: fecha menu e busca. Ajuste durante a renderização,
+  // pelo mesmo motivo do SearchOverlay — efeito aqui renderizaria duas vezes.
+  const [prevPath, setPrevPath] = useState(pathname);
+  if (prevPath !== pathname) {
+    setPrevPath(pathname);
     setMenuOpen(false);
     setSearchOpen(false);
-  }, [pathname]);
+  }
 
   const closeSearch = useCallback(() => setSearchOpen(false), []);
   const closeMenu = useCallback(() => setMenuOpen(false), []);
@@ -116,7 +121,7 @@ export function Header() {
       </header>
 
       <MobileMenu open={menuOpen} onClose={closeMenu} />
-      <SearchOverlay open={searchOpen} onClose={closeSearch} />
+      <SearchOverlay products={products} open={searchOpen} onClose={closeSearch} />
     </>
   );
 }

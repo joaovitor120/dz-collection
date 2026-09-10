@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { CatalogView } from '@/components/catalog/CatalogView';
 import { parseFilters, parseSort } from '@/lib/catalog-params';
+import { fetchProducts } from '@/lib/db';
 
 export const metadata: Metadata = {
   title: 'Catálogo',
@@ -27,8 +28,12 @@ export default async function CatalogPage({
   // seriam silenciosamente ignorados.
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const params = await searchParams;
+  const [params, products] = await Promise.all([searchParams, fetchProducts()]);
   return (
-    <CatalogView initialFilters={parseFilters(params)} initialSort={parseSort(params)} />
+    <CatalogView
+      products={products}
+      initialFilters={parseFilters(params)}
+      initialSort={parseSort(params)}
+    />
   );
 }

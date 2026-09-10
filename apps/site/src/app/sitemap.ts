@@ -1,9 +1,12 @@
 import type { MetadataRoute } from 'next';
-import { products } from '@/data/products';
+import { fetchProducts } from '@/lib/db';
 import { absoluteUrl, productPath } from '@/lib/urls';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export const revalidate = 3600;
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
+  const products = await fetchProducts();
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: absoluteUrl('/'), lastModified: now, changeFrequency: 'weekly', priority: 1 },

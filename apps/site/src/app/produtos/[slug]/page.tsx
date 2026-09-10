@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getProductBySlug, getRelated, products } from '@/data/products';
+import { fetchProductBySlug, fetchProducts, relatedFrom } from '@/lib/db';
 import { categories, site } from '@/data/site';
 import { absoluteUrl, categoryPath, productPath } from '@/lib/urls';
 import { formatBRL } from '@/lib/format';
@@ -15,11 +15,24 @@ import { Badge } from '@/components/ui/Badge';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { ShieldIcon } from '@/components/ui/Icon';
 
-/** Só existem as 8 peças reais: qualquer outro slug é 404 de verdade. */
-export const dynamicParams = false;
+/**
+ * `dynamicParams` PRECISA ser true: a proprietária cadastra produtos novos pelo
+ * painel, e a página deles tem que existir na hora — sem esperar um novo deploy.
+ * Slug que não está no banco continua sendo 404 de verdade, via notFound().
+ */
+export const dynamicParams = true;
+export const revalidate = 3600;
 
-export function generateStaticParams() {
-  return products.map((p) => ({ slug: p.slug }));
+export async function generateStaticParams() {
+  // Se o banco estiver fora do ar na hora do build, o deploy NÃO deve falhar.
+  // Com a lista vazia, cada página é gerada na primeira visita — mais lenta uma
+  // vez, mas o site sobe. Publicar tem que ser mais resiliente que consultar.
+  try {
+    const products = await fetchProducts();
+    return products.map((p) => ({ slug: p.slug }));
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({
@@ -28,7 +41,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await fetchProductBySlug(slug);
   if (!product) return { title: 'Produto não encontrado' };
 
   const description = product.description[0]?.slice(0, 300) ?? site.shortDescription;
@@ -56,11 +69,11 @@ export async function generateMetadata({
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const [product, all] = await Promise.all([fetchProductBySlug(slug), fetchProducts()]);
   if (!product) notFound();
 
   const category = categories.find((c) => c.slug === product.category);
-  const related = getRelated(product, 4);
+  const related = relatedFrom(all, product, 4);
   const hasUv = [
     ...(product.specifications ?? []).map((s) => `${s.label} ${s.value}`),
     ...(product.highlights ?? []),
@@ -75,7 +88,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     '@type': 'Product',
     name: product.name,
     description: product.description.join(' '),
-    image: product.images.map((i) => absoluteUrl(i)),
+    image: product.images,
     brand: { '@type': 'Brand', name: site.name },
     category: category?.name,
     offers: {

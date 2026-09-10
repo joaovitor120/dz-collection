@@ -7,6 +7,7 @@ import { Footer } from '@/components/layout/Footer';
 import { WhatsAppFloat } from '@/components/layout/WhatsAppFloat';
 import { site, WHATSAPP_DISPLAY } from '@/data/site';
 import { SITE_URL } from '@/lib/urls';
+import { fetchProducts } from '@/lib/db';
 
 const display = Cormorant_Garamond({
   subsets: ['latin'],
@@ -54,7 +55,13 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export const revalidate = 3600;
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // A busca do cabeçalho precisa do catálogo inteiro. Carregado uma vez aqui,
+  // no servidor, em vez de uma chamada por página.
+  const products = await fetchProducts();
+
   const organizationJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -82,7 +89,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Ir para o conteúdo
         </a>
         <AnnouncementBar />
-        <Header />
+        <Header products={products} />
         <main id="conteudo">{children}</main>
         <Footer />
         <WhatsAppFloat />

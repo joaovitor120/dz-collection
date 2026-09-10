@@ -22,8 +22,8 @@ export const ABSOLUTE_SESSION_SECONDS = 12 * 60 * 60;
 /** Janela para considerar uma autenticação "recente" em ações sensíveis (15 min). */
 export const RECENT_AUTH_SECONDS = 15 * 60;
 
-export function supabaseServer(): SupabaseClient {
-  const store = cookies();
+export async function supabaseServer(): Promise<SupabaseClient> {
+  const store = await cookies();
   return createClient({
     getAll: () => store.getAll().map(({ name, value }) => ({ name, value })),
     set: (name, value, options) => store.set(name, value, options),
@@ -51,7 +51,7 @@ export interface AdminSession {
  */
 export async function requireAdmin(options: { requireMfa?: boolean } = {}): Promise<AdminSession> {
   const requireMfa = options.requireMfa ?? true;
-  const client = supabaseServer();
+  const client = await supabaseServer();
 
   const {
     data: { user },

@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 
   if (!code) return NextResponse.redirect(new URL('/login?erro=link', request.url));
 
-  const store = cookies();
+  const store = await cookies();
   const supabase = createClient({
     getAll: () => store.getAll().map(({ name, value }) => ({ name, value })),
     set: (name, value, options) => store.set(name, value, options),

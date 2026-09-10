@@ -1,6 +1,6 @@
 'use client';
 
-import { useFormState } from 'react-dom';
+import { useActionState } from 'react';
 import { requestPasswordReset, type ActionState } from '@/app/login/actions';
 import { Alert, Field } from './AuthShell';
 import { SubmitButton } from './SubmitButton';
@@ -8,7 +8,7 @@ import { SubmitButton } from './SubmitButton';
 const initial: ActionState = {};
 
 export function ResetRequestForm() {
-  const [state, action] = useFormState(requestPasswordReset, initial);
+  const [state, action] = useActionState(requestPasswordReset, initial);
   return (
     <form action={action} className="space-y-5">
       <Alert tone="info">{state.info}</Alert>

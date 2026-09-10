@@ -36,8 +36,8 @@ export const LIMITS = {
 export type LimitName = keyof typeof LIMITS;
 
 /** IP do cliente conforme a Vercel o entrega. */
-export function clientIp(): string {
-  const h = headers();
+export async function clientIp(): Promise<string> {
+  const h = await headers();
   const forwarded = h.get('x-forwarded-for');
   if (forwarded) return forwarded.split(',')[0]?.trim() || 'desconhecido';
   return h.get('x-real-ip') ?? 'desconhecido';
@@ -94,7 +94,7 @@ export async function enforceAuthRateLimit(
   kind: 'login' | 'password_reset',
   account: string,
 ): Promise<void> {
-  const ip = clientIp();
+  const ip = await clientIp();
   await enforceRateLimit([
     { name: `${kind}_account` as LimitName, identifier: account.toLowerCase() },
     { name: `${kind}_ip` as LimitName, identifier: ip },

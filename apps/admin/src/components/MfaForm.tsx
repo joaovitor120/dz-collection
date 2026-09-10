@@ -1,6 +1,6 @@
 'use client';
 
-import { useFormState } from 'react-dom';
+import { useActionState } from 'react';
 import { verifyMfa, type ActionState } from '@/app/login/actions';
 import { Alert, Field } from './AuthShell';
 import { SubmitButton } from './SubmitButton';
@@ -8,7 +8,7 @@ import { SubmitButton } from './SubmitButton';
 const initial: ActionState = {};
 
 export function MfaForm({ factorId }: { factorId: string }) {
-  const [state, action] = useFormState(verifyMfa, initial);
+  const [state, action] = useActionState(verifyMfa, initial);
   return (
     <form action={action} className="space-y-5">
       <Alert tone="error">{state.error}</Alert>

@@ -2,7 +2,10 @@
   "name": "dz-collection",
   "version": "2.0.0",
   "private": true,
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev:site": "npm run dev -w @dz/site",
     "dev:admin": "npm run dev -w @dz/admin",
@@ -18,7 +21,10 @@
   },
   "devDependencies": {
     "@types/node": "20.14.10",
+    "playwright": "^1.47.2",
     "typescript": "5.5.3"
   },
-  "engines": { "node": ">=20.11" }
+  "engines": {
+    "node": ">=20.11"
+  }
 }

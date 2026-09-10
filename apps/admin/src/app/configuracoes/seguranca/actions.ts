@@ -13,8 +13,8 @@ import type { ActionState } from '@/app/login/actions';
  */
 export async function changePassword(_prev: ActionState, formData: FormData): Promise<ActionState> {
   try {
-    assertSameOrigin();
-    assertFetchMetadata();
+    await assertSameOrigin();
+    await assertFetchMetadata();
 
     const parsed = parseInput(passwordChangeSchema, {
       password: formData.get('password'),
@@ -49,10 +49,10 @@ export async function startMfaEnrollment(): Promise<
   { ok: true; factorId: string; qr: string } | { ok: false; error: string }
 > {
   try {
-    assertSameOrigin();
+    await assertSameOrigin();
     // Ainda em aal1: a pessoa acabou de logar com senha e vai configurar o MFA.
     await requireAdmin({ requireMfa: false });
-    const supabase = supabaseServer();
+    const supabase = await supabaseServer();
 
     const { data, error } = await supabase.auth.mfa.enroll({
       factorType: 'totp',
@@ -77,8 +77,8 @@ export async function confirmMfaEnrollment(
   formData: FormData,
 ): Promise<ActionState> {
   try {
-    assertSameOrigin();
-    assertFetchMetadata();
+    await assertSameOrigin();
+    await assertFetchMetadata();
 
     const factorId = formData.get('factorId')?.toString() ?? '';
     const code = totpCodeSchema.safeParse(formData.get('code'));
@@ -113,8 +113,8 @@ export async function confirmMfaEnrollment(
  */
 export async function disableMfa(_prev: ActionState, formData: FormData): Promise<ActionState> {
   try {
-    assertSameOrigin();
-    assertFetchMetadata();
+    await assertSameOrigin();
+    await assertFetchMetadata();
 
     const factorId = formData.get('factorId')?.toString() ?? '';
     if (!factorId) return { error: 'Fator não informado.' };

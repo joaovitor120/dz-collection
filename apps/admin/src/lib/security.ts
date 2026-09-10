@@ -26,8 +26,8 @@ export function allowedOrigins(): string[] {
  * Ausência de ambos os cabeçalhos é tratada como falha — navegador sempre envia
  * Origin em requisição que altera estado.
  */
-export function assertSameOrigin(): void {
-  const h = headers();
+export async function assertSameOrigin(): Promise<void> {
+  const h = await headers();
   const origin = h.get('origin');
   const referer = h.get('referer');
   const allowed = allowedOrigins();
@@ -51,8 +51,8 @@ function safeOrigin(url: string): string | null {
  * requisições cross-site; bloqueamos as que não fazem sentido no painel.
  * Nunca usado sozinho — é complemento do assertSameOrigin.
  */
-export function assertFetchMetadata(): void {
-  const h = headers();
+export async function assertFetchMetadata(): Promise<void> {
+  const h = await headers();
   const site = h.get('sec-fetch-site');
   if (site && !['same-origin', 'same-site', 'none'].includes(site)) {
     throw new ForbiddenError('requisição cross-site bloqueada');

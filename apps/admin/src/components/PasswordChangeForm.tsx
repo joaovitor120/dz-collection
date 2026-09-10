@@ -1,6 +1,6 @@
 'use client';
 
-import { useFormState } from 'react-dom';
+import { useActionState } from 'react';
 import { changePassword } from '@/app/configuracoes/seguranca/actions';
 import type { ActionState } from '@/app/login/actions';
 import { Alert, Field } from './AuthShell';
@@ -9,7 +9,7 @@ import { SubmitButton } from './SubmitButton';
 const initial: ActionState = {};
 
 export function PasswordChangeForm() {
-  const [state, action] = useFormState(changePassword, initial);
+  const [state, action] = useActionState(changePassword, initial);
   return (
     <form action={action} className="max-w-sm space-y-5">
       <Alert tone="error">{state.error}</Alert>

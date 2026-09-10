@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useFormState } from 'react-dom';
+import { useActionState } from 'react';
 import {
   confirmMfaEnrollment,
   disableMfa,
@@ -16,8 +16,8 @@ const initial: ActionState = {};
 export function MfaSetup({ enrolled }: { enrolled: { id: string } | null }) {
   const [enroll, setEnroll] = useState<{ factorId: string; qr: string } | null>(null);
   const [error, setError] = useState<string | undefined>();
-  const [confirmState, confirmAction] = useFormState(confirmMfaEnrollment, initial);
-  const [disableState, disableAction] = useFormState(disableMfa, initial);
+  const [confirmState, confirmAction] = useActionState(confirmMfaEnrollment, initial);
+  const [disableState, disableAction] = useActionState(disableMfa, initial);
 
   if (enrolled) {
     return (

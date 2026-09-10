@@ -24,6 +24,12 @@ function check(cond, msg) {
 const browser = await chromium.launch({ executablePath: EXEC });
 const consoleErrors = [];
 
+/** Aguarda a hidratacao terminar, no lugar do networkidle. */
+async function settle(page) {
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForTimeout(350);
+}
+
 async function newPage(width = 1440, height = 900, mobile = false) {
   const ctx = await browser.newContext({
     viewport: { width, height },
@@ -44,6 +50,7 @@ async function newPage(width = 1440, height = 900, mobile = false) {
   const seen = new Map();
   for (const slug of slugs) {
     await page.goto(`${BASE}/produtos/${slug}`, { waitUntil: 'domcontentloaded' });
+  await settle(page);
     const name = (await page.locator('h1').first().innerText()).trim();
     const href = await page
       .locator('[data-testid="whatsapp-buy"][data-product-slug="' + slug + '"]')
@@ -73,7 +80,8 @@ async function newPage(width = 1440, height = 900, mobile = false) {
 // ------------------------------------------------- 2. Card → WhatsApp/produto
 {
   const { ctx, page } = await newPage();
-  await page.goto(`${BASE}/catalogo`, { waitUntil: 'networkidle' });
+  await page.goto(`${BASE}/catalogo`, { waitUntil: 'domcontentloaded' });
+  await settle(page);
   const cards = page.locator('[data-testid="whatsapp-buy"]');
   const count = await cards.count();
   check(count === 8, `catálogo tem 8 botões Comprar (tem ${count})`);
@@ -94,7 +102,8 @@ async function newPage(width = 1440, height = 900, mobile = false) {
 {
   const { ctx, page } = await newPage();
   for (const path of ['/', '/catalogo', '/produtos/' + slugs[0], '/contato', '/sobre']) {
-    await page.goto(BASE + path, { waitUntil: 'networkidle' });
+    await page.goto(BASE + path, { waitUntil: 'domcontentloaded' });
+  await settle(page);
     const body = (await page.locator('body').innerText()).toLowerCase();
     for (const term of [
       'adicionar ao carrinho',
@@ -117,7 +126,8 @@ async function newPage(width = 1440, height = 900, mobile = false) {
 // ----------------------------------------------------------- 4. Busca overlay
 {
   const { ctx, page } = await newPage();
-  await page.goto(BASE, { waitUntil: 'networkidle' });
+  await page.goto(BASE, { waitUntil: 'domcontentloaded' });
+  await settle(page);
   await page.getByRole('button', { name: 'Buscar produtos' }).click();
   const input = page.getByRole('searchbox', { name: /Buscar por modelo/i });
   await input.fill('luna');
@@ -141,7 +151,8 @@ async function newPage(width = 1440, height = 900, mobile = false) {
 // ------------------------------------------------- 5. Filtros e ordenação
 {
   const { ctx, page } = await newPage();
-  await page.goto(`${BASE}/catalogo`, { waitUntil: 'networkidle' });
+  await page.goto(`${BASE}/catalogo`, { waitUntil: 'domcontentloaded' });
+  await settle(page);
 
   await page.getByRole('checkbox', { name: /Redondo/ }).check({ force: true });
   await page.waitForTimeout(300);
@@ -182,12 +193,14 @@ async function newPage(width = 1440, height = 900, mobile = false) {
 // -------------------------------------- 6. URL compartilhável reconstrói estado
 {
   const { ctx, page } = await newPage();
-  await page.goto(`${BASE}/catalogo?categoria=gatinho`, { waitUntil: 'networkidle' });
+  await page.goto(`${BASE}/catalogo?categoria=gatinho`, { waitUntil: 'domcontentloaded' });
+  await settle(page);
   check(
     (await page.locator('article').count()) === 1,
     'URL com ?categoria=gatinho já abre filtrada',
   );
-  await page.goto(`${BASE}/catalogo?busca=dourado`, { waitUntil: 'networkidle' });
+  await page.goto(`${BASE}/catalogo?busca=dourado`, { waitUntil: 'domcontentloaded' });
+  await settle(page);
   check(
     (await page.locator('article').count()) >= 1,
     'URL com ?busca= já abre com a busca aplicada',
@@ -198,7 +211,8 @@ async function newPage(width = 1440, height = 900, mobile = false) {
 // ------------------------------------------------------------ 7. Teclado
 {
   const { ctx, page } = await newPage();
-  await page.goto(BASE, { waitUntil: 'networkidle' });
+  await page.goto(BASE, { waitUntil: 'domcontentloaded' });
+  await settle(page);
   await page.keyboard.press('Tab');
   const firstFocus = await page.evaluate(() => document.activeElement?.textContent);
   check(
@@ -223,7 +237,8 @@ async function newPage(width = 1440, height = 900, mobile = false) {
 // -------------------------------------------------------- 8. Mobile / sticky
 {
   const { ctx, page } = await newPage(390, 780, true);
-  await page.goto(`${BASE}/produtos/${slugs[0]}`, { waitUntil: 'networkidle' });
+  await page.goto(`${BASE}/produtos/${slugs[0]}`, { waitUntil: 'domcontentloaded' });
+  await settle(page);
   await page.evaluate(() => window.scrollTo(0, 2000));
   await page.waitForTimeout(700);
   const stickyVisible = await page.evaluate(() => {
@@ -240,7 +255,8 @@ async function newPage(width = 1440, height = 900, mobile = false) {
   check(stickyVisible, 'CTA fixo aparece no mobile após rolar');
 
   // menu mobile
-  await page.goto(BASE, { waitUntil: 'networkidle' });
+  await page.goto(BASE, { waitUntil: 'domcontentloaded' });
+  await settle(page);
   await page.getByRole('button', { name: 'Abrir menu' }).click();
   await page.waitForTimeout(300);
   check(
@@ -261,7 +277,8 @@ async function newPage(width = 1440, height = 900, mobile = false) {
   for (const w of [320, 360, 375, 390, 430, 768, 1024, 1280, 1440]) {
     const { ctx, page } = await newPage(w, 900, w < 768);
     for (const path of ['/', '/catalogo', '/produtos/' + slugs[2], '/contato']) {
-      await page.goto(BASE + path, { waitUntil: 'networkidle' });
+      await page.goto(BASE + path, { waitUntil: 'domcontentloaded' });
+  await settle(page);
       const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
       );
@@ -275,6 +292,7 @@ async function newPage(width = 1440, height = 900, mobile = false) {
 {
   const { ctx, page } = await newPage();
   await page.goto(`${BASE}/produtos/${slugs[2]}`, { waitUntil: 'domcontentloaded' });
+  await settle(page);
   const ld = await page.locator('script[type="application/ld+json"]').allTextContents();
   const types = ld.map((t) => JSON.parse(t)['@type']);
   check(types.includes('Product'), 'JSON-LD Product presente');
@@ -295,6 +313,7 @@ async function newPage(width = 1440, height = 900, mobile = false) {
   const res = await page.goto(`${BASE}/produtos/nao-existe`, {
     waitUntil: 'domcontentloaded',
   });
+  await settle(page);
   check(res.status() === 404, 'produto inexistente devolve 404');
   check(
     (await page.locator('text=Não encontramos esta página').count()) >= 1,

@@ -1,6 +1,6 @@
 import 'server-only';
 
-import sharp from 'sharp';
+import sharp, { type Metadata } from 'sharp';
 import {
   ALLOWED_IMAGE_MIME,
   MAX_IMAGE_DIMENSION,
@@ -92,7 +92,7 @@ export async function validateAndReencode(file: File): Promise<ProcessedImage> {
   }
 
   // 3. Estrutura da imagem + trava contra decompression bomb
-  let meta: sharp.Metadata;
+  let meta: Metadata;
   try {
     meta = await sharp(buffer, { limitInputPixels: MAX_IMAGE_PIXELS }).metadata();
   } catch (error) {

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useFormState } from 'react-dom';
+import { useActionState } from 'react';
 import { signIn, type ActionState } from '@/app/login/actions';
 import { Alert, Field } from './AuthShell';
 import { SubmitButton } from './SubmitButton';
@@ -9,7 +9,7 @@ import { SubmitButton } from './SubmitButton';
 const initial: ActionState = {};
 
 export function LoginForm() {
-  const [state, action] = useFormState(signIn, initial);
+  const [state, action] = useActionState(signIn, initial);
   return (
     <form action={action} className="space-y-5">
       <Alert tone="error">{state.error}</Alert>

@@ -19,15 +19,16 @@ export const metadata: Metadata = {
  * grade já chega renderizada no HTML (bom para SEO e para o primeiro paint).
  * A partir daí o componente cliente assume filtros, busca e ordenação.
  */
-export default function CatalogPage({
+export default async function CatalogPage({
   searchParams,
 }: {
-  searchParams: Record<string, string | string[] | undefined>;
+  // A partir do Next 15 searchParams é uma Promise. Tratar como objeto simples
+  // faria a página ser pré-renderizada estaticamente e os filtros da URL
+  // seriam silenciosamente ignorados.
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const params = await searchParams;
   return (
-    <CatalogView
-      initialFilters={parseFilters(searchParams)}
-      initialSort={parseSort(searchParams)}
-    />
+    <CatalogView initialFilters={parseFilters(params)} initialSort={parseSort(params)} />
   );
 }

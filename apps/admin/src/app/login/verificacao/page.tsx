@@ -8,7 +8,7 @@ export const metadata = { title: 'Verificação em duas etapas' };
 export const dynamic = 'force-dynamic';
 
 export default async function Page() {
-  const store = cookies();
+  const store = await cookies();
   const supabase = createClient({
     getAll: () => store.getAll().map(({ name, value }) => ({ name, value })),
     set: (name, value, options) => store.set(name, value, options),

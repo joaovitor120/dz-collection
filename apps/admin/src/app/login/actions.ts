@@ -18,8 +18,8 @@ export interface ActionState {
   info?: string;
 }
 
-function client() {
-  const store = cookies();
+async function client() {
+  const store = await cookies();
   return createClient({
     getAll: () => store.getAll().map(({ name, value }) => ({ name, value })),
     set: (name, value, options) => store.set(name, value, options),
@@ -39,8 +39,8 @@ export async function signIn(_prev: ActionState, formData: FormData): Promise<Ac
   const GENERIC = 'E-mail ou senha inválidos.';
 
   try {
-    assertSameOrigin();
-    assertFetchMetadata();
+    await assertSameOrigin();
+    await assertFetchMetadata();
 
     const parsed = parseInput(loginSchema, {
       email: formData.get('email'),
@@ -51,15 +51,15 @@ export async function signIn(_prev: ActionState, formData: FormData): Promise<Ac
     const { email, password } = parsed.data;
     await enforceAuthRateLimit('login', email);
 
-    const supabase = client();
+    const supabase = await client();
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error || !data.user) {
-      logServer('login_failed', { email, ip: clientIp() });
+      logServer('login_failed', { email, ip: await clientIp() });
       return { error: GENERIC };
     }
 
-    logServer('login_password_ok', { user_id: data.user.id, ip: clientIp() });
+    logServer('login_password_ok', { user_id: data.user.id, ip: await clientIp() });
 
     // Senha correta não é suficiente. Se a conta tem MFA, o acesso só se
     // completa depois do segundo fator.
@@ -84,8 +84,8 @@ export async function signIn(_prev: ActionState, formData: FormData): Promise<Ac
  */
 export async function verifyMfa(_prev: ActionState, formData: FormData): Promise<ActionState> {
   try {
-    assertSameOrigin();
-    assertFetchMetadata();
+    await assertSameOrigin();
+    await assertFetchMetadata();
 
     const parsed = parseInput(mfaChallengeSchema, {
       factorId: formData.get('factorId'),
@@ -93,9 +93,9 @@ export async function verifyMfa(_prev: ActionState, formData: FormData): Promise
     });
     if (!parsed.ok) return { error: 'Código inválido.' };
 
-    await enforceRateLimit([{ name: 'mfa_challenge', identifier: clientIp() }]);
+    await enforceRateLimit([{ name: 'mfa_challenge', identifier: await clientIp() }]);
 
-    const supabase = client();
+    const supabase = await client();
     const { factorId, code } = parsed.data;
 
     const { data: challenge, error: challengeError } =
@@ -109,7 +109,7 @@ export async function verifyMfa(_prev: ActionState, formData: FormData): Promise
     });
 
     if (error) {
-      logServer('mfa_failed', { ip: clientIp() });
+      logServer('mfa_failed', { ip: await clientIp() });
       return { error: 'Código inválido.' };
     }
 
@@ -139,7 +139,7 @@ export async function requestPasswordReset(
     'Se houver uma conta válida para esse e-mail, enviaremos as instruções de recuperação.';
 
   try {
-    assertSameOrigin();
+    await assertSameOrigin();
     const parsed = parseInput(passwordResetRequestSchema, { email: formData.get('email') });
     if (!parsed.ok) return { info: NEUTRAL };
 
@@ -147,7 +147,7 @@ export async function requestPasswordReset(
     await enforceAuthRateLimit('password_reset', email);
 
     const adminUrl = (process.env.NEXT_PUBLIC_ADMIN_URL ?? '').replace(/\/+$/, '');
-    const supabase = client();
+    const supabase = await client();
 
     // redirectTo é montado pelo servidor a partir da env, nunca de input do
     // usuário — e o Supabase ainda valida contra a allowlist do projeto.
@@ -155,7 +155,7 @@ export async function requestPasswordReset(
       redirectTo: `${adminUrl}/auth/callback?proximo=/redefinir-senha`,
     });
 
-    logServer('password_reset_requested', { email, ip: clientIp() });
+    logServer('password_reset_requested', { email, ip: await clientIp() });
     return { info: NEUTRAL };
   } catch (error) {
     if (isRedirect(error)) throw error;
@@ -173,8 +173,8 @@ export async function requestPasswordReset(
  */
 export async function signOut(): Promise<never> {
   try {
-    assertSameOrigin();
-    const supabase = client();
+    await assertSameOrigin();
+    const supabase = await client();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -199,5 +199,5 @@ function isRedirect(error: unknown): boolean {
 
 /** Cabeçalho de origem, exposto para os testes de segurança. */
 export async function debugOrigin(): Promise<string | null> {
-  return headers().get('origin');
+  return (await headers()).get('origin');
 }

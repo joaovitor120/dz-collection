@@ -11,6 +11,18 @@ const nextConfig = {
       ? [{ protocol: 'https', hostname: new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname }]
       : [],
   },
-  experimental: { serverActions: { bodySizeLimit: '6mb' } },
+  experimental: {
+    serverActions: {
+      // Limite de payload para upload de imagem via Server Action.
+      bodySizeLimit: '6mb',
+      // Allowlist de origem da checagem de CSRF nativa do Next para Server
+      // Actions. Roda ANTES do nosso assertSameOrigin — duas camadas, uma do
+      // framework e uma nossa.
+      allowedOrigins: [
+        new URL(process.env.NEXT_PUBLIC_ADMIN_URL ?? 'https://dz-collection-adm.vercel.app').host,
+        ...(process.env.NODE_ENV === 'production' ? [] : ['localhost:3001']),
+      ],
+    },
+  },
 };
 export default nextConfig;

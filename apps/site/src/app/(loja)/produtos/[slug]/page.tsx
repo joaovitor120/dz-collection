@@ -23,16 +23,19 @@ import { ShieldIcon } from '@/components/ui/Icon';
 export const dynamicParams = true;
 export const revalidate = 3600;
 
+/**
+ * Sem try/catch de propósito.
+ *
+ * Se o banco estiver inacessível no build, o build DEVE falhar: a Vercel mantém
+ * o deploy anterior no ar, e a loja continua funcionando enquanto o erro é
+ * corrigido. Engolir a falha produziria o pior resultado possível — um deploy
+ * bem-sucedido servindo uma vitrine vazia para quem chega para comprar.
+ *
+ * Falhar alto e não publicar é mais seguro que publicar e não avisar.
+ */
 export async function generateStaticParams() {
-  // Se o banco estiver fora do ar na hora do build, o deploy NÃO deve falhar.
-  // Com a lista vazia, cada página é gerada na primeira visita — mais lenta uma
-  // vez, mas o site sobe. Publicar tem que ser mais resiliente que consultar.
-  try {
-    const products = await fetchProducts();
-    return products.map((p) => ({ slug: p.slug }));
-  } catch {
-    return [];
-  }
+  const products = await fetchProducts();
+  return products.map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({

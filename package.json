@@ -7,15 +7,12 @@
     "packages/*"
   ],
   "scripts": {
-    "dev:site": "npm run dev -w @dz/site",
-    "dev:admin": "npm run dev -w @dz/admin",
-    "build": "npm run build -w @dz/site && npm run build -w @dz/admin",
-    "build:site": "npm run build -w @dz/site",
-    "build:admin": "npm run build -w @dz/admin",
-    "typecheck": "tsc -b apps/site apps/admin packages/shared",
-    "lint": "npm run lint -w @dz/site && npm run lint -w @dz/admin",
+    "dev": "npm run dev -w @dz/site",
+    "build": "npm run build -w @dz/site",
+    "start": "npm run start -w @dz/site",
+    "typecheck": "tsc -b apps/site packages/shared",
+    "lint": "npm run lint -w @dz/site",
     "test:db": "./supabase/tests/run-local.sh",
-    "test:security": "node --experimental-strip-types --no-warnings scripts/security-suite.mts",
     "seed:generate": "node --experimental-strip-types --no-warnings scripts/generate-seed.mts",
     "verify:migration": "node --experimental-strip-types --no-warnings scripts/verify-migration.mts",
     "imagens:subir": "node scripts/subir-imagens.mjs"

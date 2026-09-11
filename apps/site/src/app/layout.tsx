@@ -1,24 +1,43 @@
 import type { Metadata, Viewport } from 'next';
-import { Cormorant_Garamond, Inter } from 'next/font/google';
+import localFont from 'next/font/local';
 import './globals.css';
-import { AnnouncementBar } from '@/components/layout/AnnouncementBar';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
-import { WhatsAppFloat } from '@/components/layout/WhatsAppFloat';
-import { site, WHATSAPP_DISPLAY } from '@/data/site';
+import { site } from '@/data/site';
 import { SITE_URL } from '@/lib/urls';
-import { fetchProducts } from '@/lib/db';
 
-const display = Cormorant_Garamond({
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
+/**
+ * =============================================================================
+ * LAYOUT RAIZ — só o esqueleto do documento
+ * =============================================================================
+ * Fontes, CSS global e metadados padrão. Nada de cabeçalho, rodapé ou botão de
+ * WhatsApp: isso pertence à loja, e o painel não pode herdar.
+ *
+ * Quem monta cada casca é o layout do respectivo grupo de rotas:
+ *   (loja)/layout.tsx   → vitrine pública
+ *   admin/layout.tsx    → painel administrativo
+ * =============================================================================
+ */
+
+/**
+ * Fontes SERVIDAS PELO PRÓPRIO SITE, não pelo Google.
+ *
+ * Arquivos variáveis, subset latino, os mesmos que o Google entrega. Motivos:
+ * o build deixa de depender de uma rede externa, o visitante não faz requisição
+ * a um terceiro só para ler a página, e `fonts.googleapis.com` e
+ * `fonts.gstatic.com` saem da CSP — duas origens externas a menos, inclusive na
+ * do painel.
+ */
+const display = localFont({
+  src: '../fonts/cormorant-garamond-variable.woff2',
+  weight: '300 700',
+  style: 'normal',
   variable: '--font-display',
   display: 'swap',
 });
 
-const sans = Inter({
-  subsets: ['latin'],
-  weight: ['400', '500'],
+const sans = localFont({
+  src: '../fonts/inter-variable.woff2',
+  weight: '100 900',
+  style: 'normal',
   variable: '--font-sans',
   display: 'swap',
 });
@@ -31,20 +50,6 @@ export const metadata: Metadata = {
   },
   description: site.shortDescription,
   applicationName: site.name,
-  alternates: { canonical: '/' },
-  openGraph: {
-    type: 'website',
-    locale: 'pt_BR',
-    siteName: site.name,
-    title: `${site.name} — ${site.tagline}`,
-    description: site.shortDescription,
-    url: SITE_URL,
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: `${site.name} — ${site.tagline}`,
-    description: site.shortDescription,
-  },
   robots: { index: true, follow: true },
 };
 
@@ -55,49 +60,10 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 };
 
-export const revalidate = 3600;
-
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // A busca do cabeçalho precisa do catálogo inteiro. Carregado uma vez aqui,
-  // no servidor, em vez de uma chamada por página.
-  const products = await fetchProducts();
-
-  const organizationJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    name: site.name,
-    url: SITE_URL,
-    description: site.shortDescription,
-    slogan: site.tagline,
-    contactPoint: [
-      {
-        '@type': 'ContactPoint',
-        contactType: 'customer service',
-        telephone: WHATSAPP_DISPLAY,
-        availableLanguage: ['Portuguese'],
-      },
-    ],
-  };
-
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className={`${display.variable} ${sans.variable}`}>
-      <body className="font-sans text-ink antialiased">
-        <a
-          href="#conteudo"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-drawer focus:bg-ink focus:px-4 focus:py-2 focus:text-2xs focus:uppercase focus:tracking-widest2 focus:text-paper"
-        >
-          Ir para o conteúdo
-        </a>
-        <AnnouncementBar />
-        <Header products={products} />
-        <main id="conteudo">{children}</main>
-        <Footer />
-        <WhatsAppFloat />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
-        />
-      </body>
+      <body className="font-sans text-ink antialiased">{children}</body>
     </html>
   );
 }

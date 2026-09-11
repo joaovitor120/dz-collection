@@ -27,8 +27,11 @@ export function requireServerEnv(name: string): string {
 export const SITE_URL = () =>
   publicEnv('NEXT_PUBLIC_SITE_URL', 'https://dz-collection.vercel.app').replace(/\/+$/, '');
 
-export const ADMIN_URL = () =>
-  publicEnv('NEXT_PUBLIC_ADMIN_URL', 'https://dz-collection-adm.vercel.app').replace(/\/+$/, '');
+/**
+ * O painel vive sob /admin no mesmo domínio da loja. Não existe URL própria —
+ * e portanto não existe NEXT_PUBLIC_ADMIN_URL para sair de sincronia.
+ */
+export const ADMIN_URL = () => `${SITE_URL()}/admin`;
 
 export const SUPABASE_URL = () => publicEnv('NEXT_PUBLIC_SUPABASE_URL');
 export const SUPABASE_PUBLISHABLE_KEY = () => publicEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY');

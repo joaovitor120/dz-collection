@@ -11,8 +11,8 @@ const securityHeaders = [
     value: [
       `default-src 'self'`,
       `script-src 'self' 'unsafe-inline'${isProduction ? '' : " 'unsafe-eval'"}`,
-      `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
-      `font-src 'self' https://fonts.gstatic.com data:`,
+      `style-src 'self' 'unsafe-inline'`,
+      `font-src 'self' data:`,
       `img-src 'self' data: blob: ${supabaseUrl}`,
       `connect-src 'self' ${supabaseUrl}`,
       `object-src 'none'`,
@@ -35,6 +35,7 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   transpilePackages: ['@dz/shared'],
+  serverExternalPackages: ['sharp'],
   images: {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [320, 360, 390, 430, 640, 750, 828, 1080, 1200, 1440, 1920],
@@ -44,7 +45,10 @@ const nextConfig = {
       : [],
   },
   async headers() {
-    return [{ source: '/:path*', headers: securityHeaders }];
+    // Exclui /admin: lá quem define os cabeçalhos é o middleware, com nonce por
+    // requisição. Duas CSPs na mesma resposta seriam aplicadas em interseção, e
+    // a do site (sem nonce) invalidaria a do painel.
+    return [{ source: '/((?!admin).*)', headers: securityHeaders }];
   },
 };
 export default nextConfig;

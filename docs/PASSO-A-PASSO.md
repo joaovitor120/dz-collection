@@ -18,8 +18,8 @@ Essa chave ignora RLS. Quem a tiver lê, altera e apaga qualquer dado do banco.
 3. Menu lateral → **Project Settings** → **API Keys**
 4. Na chave secreta, use a opção de **rotacionar / gerar nova** (revoke + create)
 5. Guarde a nova chave **fora do chat, fora do GitHub, fora do código**
-   — ela só vive em dois lugares: `.env.local` na sua máquina e nas Environment
-   Variables da Vercel (projeto do painel)
+   — ela só vive em dois lugares: `apps/site/.env.local` na sua máquina e nas
+   Environment Variables da Vercel
 
 A chave publicável (`sb_publishable_...`) é pública por natureza — não precisa
 rotacionar.
@@ -150,10 +150,10 @@ Authenticator** ou **Microsoft Authenticator** no celular.
 
 **Authentication** → **URL Configuration**:
 
-- **Site URL**: `http://localhost:3001`
+- **Site URL**: `http://localhost:3000`
 - **Redirect URLs** (adicione uma por vez):
-  - `http://localhost:3001/**`
-  - `https://dz-collection-adm.vercel.app/**` *(quando publicar o painel)*
+  - `http://localhost:3000/**`
+  - `https://dz-collection.vercel.app/**` *(quando publicar)*
 
 Sem isso, o link de "esqueci minha senha" não volta para o painel.
 
@@ -161,77 +161,62 @@ Sem isso, o link de "esqueci minha senha" não volta para o painel.
 
 ## ETAPA 4 — ONDE FICA O PAINEL ADMINISTRATIVO
 
-O painel **não é uma página do site**. São dois aplicativos separados,
-de propósito — o catálogo público e o painel nunca compartilham código de
-autenticação, sessão ou permissão.
+O painel é uma área do próprio site, em **`/admin`**. Uma aplicação só, um
+projeto só na Vercel.
 
 | | Endereço | O que é |
 |---|---|---|
 | Catálogo público | `http://localhost:3000` | o site que o cliente vê |
-| **Painel administrativo** | **`http://localhost:3001`** | onde você edita produtos |
+| **Painel** | **`http://localhost:3000/admin`** | onde você edita produtos |
 
-O painel **ainda não está publicado na Vercel** — hoje ele só roda na sua
-máquina. Publicá-lo é uma etapa posterior (etapa 6).
+Em produção: **`https://dz-collection.vercel.app/admin`**.
+
+O painel não herda cabeçalho, rodapé nem botão de WhatsApp da loja — são grupos
+de rotas diferentes, com cascas diferentes. E `/admin` responde com `noindex` e
+`no-store`, então não entra em buscador nem fica em cache do navegador.
 
 ### 4.1 — Configurar o arquivo de variáveis
 
-Antes de rodar, o painel precisa saber onde fica o banco.
-
-Na pasta do projeto, crie o arquivo `apps/admin/.env.local` com este conteúdo
-(trocando pelos valores do **seu** projeto, com a **chave secreta nova** da
-etapa 0):
+Crie `apps/site/.env.local` (trocando pelos valores do **seu** projeto, com a
+**chave secreta nova** da etapa 0):
 
 ```
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
-NEXT_PUBLIC_ADMIN_URL=http://localhost:3001
 NEXT_PUBLIC_SUPABASE_URL=https://SEU-PROJETO.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 SUPABASE_SECRET_KEY=sb_secret_NOVA_CHAVE_DA_ETAPA_0
-REVALIDATE_SECRET=um-valor-aleatorio-longo-qualquer
 ```
 
-E `apps/site/.env.local`:
+> `.env.local` está no `.gitignore`. Ele nunca vai para o GitHub — é assim que
+> tem que ser.
 
-```
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
-NEXT_PUBLIC_SUPABASE_URL=https://SEU-PROJETO.supabase.co
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
-```
+### 4.2 — Subir as fotos para o Storage
 
-> `.env.local` está no `.gitignore`. Ele nunca vai para o GitHub — é assim
-> que tem que ser.
-
-### 4.2 — Rodar o painel
-
-Abra o **PowerShell** na pasta do projeto e rode:
+Sem isso o site fica com todas as imagens quebradas: o banco já sabe o caminho
+das 25 fotos, mas os arquivos ainda não estão lá.
 
 ```powershell
-npm run dev:admin
+npm run imagens:subir
 ```
 
-Depois abra no navegador: **http://localhost:3001**
-
-Para rodar o catálogo público ao mesmo tempo, abra uma **segunda janela** do
-PowerShell:
+### 4.3 — Rodar
 
 ```powershell
-npm run dev:site
+npm run dev
 ```
 
-E acesse **http://localhost:3000**.
+Loja em **http://localhost:3000**, painel em **http://localhost:3000/admin**.
 
-### 4.3 — Primeiro login
+### 4.4 — Primeiro login
 
-1. `http://localhost:3001` → cai na tela de login
+1. `http://localhost:3000/admin` → cai na tela de login
 2. E-mail e senha da etapa 2.1
-3. O painel manda você configurar o MFA → leia o QR Code no app do celular
+3. O painel manda configurar o MFA → leia o QR Code no app do celular
 4. Digite o código de 6 dígitos
-5. Pronto — você está dentro
+5. Pronto — **Produtos** no menu do topo
 
-> Se aparecer a página **"Configuração pendente"**, é o `.env.local` faltando
-> ou com valor errado. A página lista exatamente qual variável falta.
-
----
+> Se aparecer **"Configuração pendente"**, é o `.env.local` faltando ou com
+> valor errado. A página lista exatamente qual variável falta.
 
 ## ETAPA 5 — SITUAÇÃO ATUAL DO SITE PUBLICADO
 
@@ -241,7 +226,7 @@ banco de dados). Nada quebrou lá.
 
 O erro de deploy que você viu é o **preview da branch `mudanca-grande`**.
 Ele falha por um motivo esperado e já previsto: o repositório virou um
-**monorepo** (`apps/site`, `apps/admin`, `packages/shared`), e o projeto na
+**monorepo** (`apps/site`, `packages/shared`), e o projeto na
 Vercel ainda aponta para a **raiz** do repositório. O `next build` roda na
 raiz, não acha aplicação nenhuma, e falha.
 
@@ -251,26 +236,37 @@ raiz, não acha aplicação nenhuma, e falha.
 
 ## ETAPA 6 — PUBLICAR (só quando tudo acima estiver funcionando)
 
-### 6.1 — Corrigir o Root Directory do site
+Um projeto só na Vercel. O painel vai junto, em `/admin`.
+
+### 6.1 — Root Directory
 
 Vercel → projeto `dz-collection` → **Settings** → **Build and Deployment** →
 **Root Directory** → `apps/site` → **Save**.
 
-### 6.2 — Criar o projeto do painel
+> **Atenção à ordem.** A produção ainda serve a branch `main`, que é a estrutura
+> antiga, sem a pasta `apps/`. Trocar o Root Directory antes do merge faz o
+> próximo build de produção falhar. Faça o merge de `mudanca-grande` em `main`
+> na mesma janela, ou troque a production branch primeiro.
 
-Vercel → **Add New** → **Project** → mesmo repositório do GitHub →
-**Root Directory** = `apps/admin` → nome `dz-collection-adm`.
+### 6.2 — Environment Variables
 
-Environment Variables desse projeto: as mesmas cinco de `apps/admin/.env.local`,
-mas com as URLs de produção.
+**Settings** → **Environment Variables**, em Production e Preview:
 
-> A `SUPABASE_SECRET_KEY` entra **apenas** no projeto do painel.
-> **Nunca** no projeto do catálogo público.
+```
+NEXT_PUBLIC_SITE_URL                  = https://dz-collection.vercel.app
+NEXT_PUBLIC_SUPABASE_URL              = https://SEU-PROJETO.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY  = sb_publishable_...
+SUPABASE_SECRET_KEY                   = (a chave nova da etapa 0)
+```
 
-### 6.3 — Voltar às URLs de produção
+### 6.3 — Voltar às URLs de produção no Supabase
 
-Depois de publicar, atualize as **Redirect URLs** do Supabase (etapa 3.3) e a
-**Site URL** para o endereço real do painel.
+**Authentication** → **URL Configuration**:
+
+- **Site URL**: `https://dz-collection.vercel.app`
+- **Redirect URLs**: `https://dz-collection.vercel.app/**`
+
+Depois disso o painel fica em **https://dz-collection.vercel.app/admin**.
 
 ---
 

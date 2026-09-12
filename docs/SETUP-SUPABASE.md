@@ -82,13 +82,16 @@ dentro do próprio painel, no primeiro acesso.
 
 **Authentication → URL Configuration**
 
-- **Site URL**: `https://dz-collection-adm.vercel.app`
+O painel vive em `/admin`, no mesmo domínio da loja — não há mais um endereço
+separado para ele.
+
+- **Site URL**: `https://dz-collection.vercel.app`
 - **Redirect URLs** (allowlist — nada além disto):
   ```
-  https://dz-collection-adm.vercel.app/auth/callback
-  https://dz-collection-adm.vercel.app/redefinir-senha
-  http://localhost:3001/auth/callback
-  http://localhost:3001/redefinir-senha
+  https://dz-collection.vercel.app/admin/auth/callback
+  https://dz-collection.vercel.app/admin/redefinir-senha
+  http://localhost:3000/admin/auth/callback
+  http://localhost:3000/admin/redefinir-senha
   ```
 
 Essa allowlist é o que impede open redirect no fluxo de recuperação de senha.
@@ -113,27 +116,27 @@ Se o painel ainda mostrar o modelo antigo (`anon` / `service_role`), trate a
 
 Dois projetos, com conjuntos diferentes de propósito:
 
-**Projeto público (`dz-collection`)**
+**Projeto único (`dz-collection`)** — a loja em `/` e o painel em `/admin`
 ```
 NEXT_PUBLIC_SITE_URL
-NEXT_PUBLIC_SUPABASE_URL
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-REVALIDATE_SECRET
-```
-
-**Projeto admin (`dz-collection-adm`)**
-```
-NEXT_PUBLIC_SITE_URL
-NEXT_PUBLIC_ADMIN_URL
 NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 SUPABASE_SECRET_KEY
-REVALIDATE_SECRET
 ```
 
-`REVALIDATE_SECRET`: gere com `openssl rand -base64 32` e use **o mesmo valor**
-nos dois projetos — é o que autentica o admin ao mandar o site público
-atualizar o cache depois de uma alteração.
+São quatro, e só essas.
+
+`SUPABASE_SECRET_KEY` é a única server-only. Ela nunca chega ao navegador:
+`requireServerEnv()` recusa qualquer nome com prefixo `NEXT_PUBLIC_` e lança se
+for lida no cliente, e o módulo que a usa tem `import 'server-only'`, o que
+quebra o build se algum componente de cliente tentar importá-lo.
+
+> **`REVALIDATE_SECRET` não existe mais.** Ele autenticava o painel quando este
+> era um site separado e precisava avisar o catálogo por HTTP que o cache tinha
+> envelhecido. Com os dois na mesma aplicação, isso virou uma chamada de função
+> no mesmo processo — e o endpoint `/api/revalidar`, que era a razão do segredo
+> existir, foi removido junto. Se você viu essa variável em algum documento,
+> era instrução velha.
 
 ## 10. Backup
 

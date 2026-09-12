@@ -13,7 +13,7 @@
  * Uso, na raiz do projeto:
  *     node scripts/subir-imagens.mjs
  *
- * Precisa de apps/admin/.env.local com SUPABASE_SECRET_KEY preenchida.
+ * Precisa de apps/site/.env.local com SUPABASE_SECRET_KEY preenchida.
  * A chave só é lida em memória — nunca é impressa, nem gravada em lugar nenhum.
  * =============================================================================
  */
@@ -39,13 +39,22 @@ function loadEnv(file) {
   return out;
 }
 
-const env = { ...loadEnv(join(ROOT, 'apps/admin/.env.local')), ...process.env };
+// apps/site é o único lugar hoje. apps/admin some junto com o app separado —
+// fica na lista só para quem ainda tiver a pasta antiga por perto.
+const env = {
+  ...loadEnv(join(ROOT, 'apps/admin/.env.local')),
+  ...loadEnv(join(ROOT, 'apps/site/.env.local')),
+  ...process.env,
+};
 const url = env.NEXT_PUBLIC_SUPABASE_URL;
 const secret = env.SUPABASE_SECRET_KEY;
 
-if (!url || !secret || secret.startsWith('COLE-AQUI')) {
+const PLACEHOLDERS = ['COLE-AQUI', 'AINDA-NAO-CONFIGURADA', 'sb_secret_XXXX', 'TROQUE'];
+const ehPlaceholder = (v) => PLACEHOLDERS.some((p) => v.startsWith(p));
+
+if (!url || !secret || ehPlaceholder(secret)) {
   console.error(
-    '\n  Faltou configurar apps/admin/.env.local:\n' +
+    '\n  Faltou configurar apps/site/.env.local:\n' +
       '    NEXT_PUBLIC_SUPABASE_URL=https://SEU-PROJETO.supabase.co\n' +
       '    SUPABASE_SECRET_KEY=sb_secret_...\n',
   );

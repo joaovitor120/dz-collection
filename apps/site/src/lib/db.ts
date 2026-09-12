@@ -32,9 +32,36 @@ function publicClient(): SupabaseClient {
   if (cached) return cached;
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
   if (!url || !key) {
+    // A mensagem diz o que ESTE ambiente realmente enxerga. "Faltando" sozinho
+    // manda a pessoa adivinhar entre variável não salva, salva no ambiente
+    // errado, nome com erro de digitação e build servido de cache — situações
+    // diferentes, com correções diferentes.
+    //
+    // Só NOMES, nunca valores: a lista vai para o log de build da Vercel.
+    const visiveis = Object.keys(process.env)
+      .filter((n) => n.startsWith('NEXT_PUBLIC_'))
+      .sort();
+
+    const faltando = [
+      url ? null : 'NEXT_PUBLIC_SUPABASE_URL',
+      key ? null : 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY',
+    ].filter(Boolean);
+
     throw new Error(
-      'Catálogo indisponível: NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY precisam estar definidas.',
+      [
+        'Catálogo indisponível.',
+        `  Faltando: ${faltando.join(', ')}`,
+        `  NEXT_PUBLIC_* que este ambiente enxerga: ${
+          visiveis.length > 0 ? visiveis.join(', ') : '(nenhuma)'
+        }`,
+        '',
+        '  Se a lista acima estiver vazia, nenhuma variável chegou a este build:',
+        '  confira se foram salvas NESTE projeto da Vercel e se o ambiente do',
+        '  build (Production/Preview) está marcado. Se a lista tiver nomes mas',
+        '  faltar algum, é erro de digitação no nome.',
+      ].join('\n'),
     );
   }
   cached = createClient(url, key, {

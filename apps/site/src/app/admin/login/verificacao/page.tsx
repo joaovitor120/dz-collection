@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { createClient } from '@dz/shared/supabase/server';
+import { createClient } from '@/shared/supabase/server';
 import { AuthShell } from '@/components/admin/AuthShell';
 import { MfaForm } from '@/components/admin/MfaForm';
 

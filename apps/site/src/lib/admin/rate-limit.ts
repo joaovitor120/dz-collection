@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { headers } from 'next/headers';
-import { createAdminClient } from '@dz/shared/supabase/admin';
+import { createAdminClient } from '@/shared/supabase/admin';
 import { RateLimitError, logServer } from './security';
 
 /**

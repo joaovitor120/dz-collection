@@ -34,7 +34,6 @@ if (isProduction) {
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  transpilePackages: ['@dz/shared'],
   serverExternalPackages: ['sharp'],
   images: {
     formats: ['image/avif', 'image/webp'],

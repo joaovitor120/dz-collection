@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useState } from 'react';
-import type { ProductSpecificationRow } from '@dz/shared';
+import type { ProductSpecificationRow } from '@/shared';
 import { saveSpecifications } from '@/app/admin/produtos/actions';
 import type { ActionState } from '@/app/admin/login/actions';
 import { SubmitButton } from './SubmitButton';

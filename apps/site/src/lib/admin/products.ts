@@ -1,8 +1,8 @@
 import 'server-only';
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { CategoryRow, ProductImageRow, ProductRow, ProductSpecificationRow } from '@dz/shared';
-import { SORT_COLUMNS, type SortOption } from '@dz/shared';
+import type { CategoryRow, ProductImageRow, ProductRow, ProductSpecificationRow } from '@/shared';
+import { SORT_COLUMNS, type SortOption } from '@/shared';
 
 /**
  * =============================================================================

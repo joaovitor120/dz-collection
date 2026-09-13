@@ -2,16 +2,13 @@
   "name": "dz-collection",
   "version": "2.0.0",
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
   "scripts": {
-    "dev": "npm run dev -w @dz/site",
-    "build": "npm run build -w @dz/site",
-    "start": "npm run start -w @dz/site",
-    "typecheck": "tsc -b apps/site packages/shared",
-    "lint": "npm run lint -w @dz/site",
+    "dev": "npm --prefix apps/site run dev",
+    "build": "npm --prefix apps/site run build",
+    "start": "npm --prefix apps/site run start",
+    "lint": "npm --prefix apps/site run lint",
+    "typecheck": "npm --prefix apps/site run typecheck",
+    "install:site": "npm --prefix apps/site install",
     "test:db": "./supabase/tests/run-local.sh",
     "seed:generate": "node --experimental-strip-types --no-warnings scripts/generate-seed.mts",
     "verify:migration": "node --experimental-strip-types --no-warnings scripts/verify-migration.mts",

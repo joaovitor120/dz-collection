@@ -6,7 +6,7 @@ import {
   getProductBySlug as dbProductBySlug,
   getProducts as dbProducts,
   type Product as DbProduct,
-} from '@dz/shared';
+} from '@/shared';
 import type { CategorySlug, Product } from '@/types';
 
 /**

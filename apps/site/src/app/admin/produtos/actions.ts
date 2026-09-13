@@ -10,7 +10,7 @@ import {
   productUpdateSchema,
   specificationSchema,
   uuidSchema,
-} from '@dz/shared';
+} from '@/shared';
 import { audit, requireAdmin } from '@/lib/admin/auth';
 import { buildStoragePath, validateAndReencode } from '@/lib/admin/images';
 import {

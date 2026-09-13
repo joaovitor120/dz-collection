@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { passwordChangeSchema, parseInput, totpCodeSchema } from '@dz/shared';
+import { passwordChangeSchema, parseInput, totpCodeSchema } from '@/shared';
 import { audit, requireAdmin, requireRecentAuth, supabaseServer } from '@/lib/admin/auth';
 import { assertFetchMetadata, assertSameOrigin, logServer, toPublicError } from '@/lib/admin/security';
 import type { ActionState } from '@/app/admin/login/actions';

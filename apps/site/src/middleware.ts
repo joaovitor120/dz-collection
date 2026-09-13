@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { updateSession } from '@dz/shared/supabase/middleware';
+import { updateSession } from '@/shared/supabase/middleware';
 
 /**
  * =============================================================================

@@ -2,8 +2,8 @@
 
 import { redirect } from 'next/navigation';
 import { cookies, headers } from 'next/headers';
-import { loginSchema, parseInput, passwordResetRequestSchema, mfaChallengeSchema } from '@dz/shared';
-import { createClient } from '@dz/shared/supabase/server';
+import { loginSchema, parseInput, passwordResetRequestSchema, mfaChallengeSchema } from '@/shared';
+import { createClient } from '@/shared/supabase/server';
 import { enforceAuthRateLimit, enforceRateLimit, clientIp } from '@/lib/admin/rate-limit';
 import {
   assertFetchMetadata,

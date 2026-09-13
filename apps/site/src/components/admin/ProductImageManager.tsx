@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
-import type { ProductImageRow } from '@dz/shared';
+import type { ProductImageRow } from '@/shared';
 import { deleteImage, setPrimaryImage, uploadImage } from '@/app/admin/produtos/actions';
 import type { ActionState } from '@/app/admin/login/actions';
 import { SubmitButton } from './SubmitButton';

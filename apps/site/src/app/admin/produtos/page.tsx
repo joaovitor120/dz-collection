@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { formatCents } from '@dz/shared';
+import { formatCents } from '@/shared';
 import { requireAdminPage } from '@/lib/admin/auth';
 import { listProducts, storagePublicUrl } from '@/lib/admin/products';
 import { AdminHeader } from '@/components/admin/AdminHeader';

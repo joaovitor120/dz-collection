@@ -6,7 +6,7 @@ import {
   MAX_IMAGE_DIMENSION,
   MAX_IMAGE_PIXELS,
   MAX_UPLOAD_BYTES,
-} from '@dz/shared';
+} from '@/shared';
 import { ValidationError, logServer } from './security';
 
 /**

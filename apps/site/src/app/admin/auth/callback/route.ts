@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
-import { createClient } from '@dz/shared/supabase/server';
+import { createClient } from '@/shared/supabase/server';
 import { safeRedirectPath, logServer } from '@/lib/admin/security';
 
 export const dynamic = 'force-dynamic';

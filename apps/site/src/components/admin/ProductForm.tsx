@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react';
 import Link from 'next/link';
-import type { CategoryRow, ProductRow } from '@dz/shared';
+import type { CategoryRow, ProductRow } from '@/shared';
 import { createProduct, updateProduct } from '@/app/admin/produtos/actions';
 import type { ActionState } from '@/app/admin/login/actions';
 import { SubmitButton } from './SubmitButton';
